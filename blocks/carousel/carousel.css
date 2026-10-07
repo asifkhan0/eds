@@ -1,0 +1,50 @@
+.carousel {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.carousel .slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.carousel .slide:first-of-type {
+  position: relative;
+}
+
+.carousel .slide > div {
+  width: 50%;
+}
+
+.carousel .slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.carousel .slide-text {
+  padding: 40px;
+}
+
+.carousel .btn {
+  position: absolute;
+  z-index: 10;
+  cursor: pointer;
+  padding: 10px 20px;
+  border: 0;
+  background: none;
+}
+
+.carousel .btn-next {
+  right: 20px;
+  top: 50%;
+}
+
+.carousel .btn-prev {
+  left: 20px;
+  top: 50%;
+}
