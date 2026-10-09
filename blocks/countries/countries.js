@@ -1,6 +1,6 @@
 
 export default async function decorate(block) {
-  const link = block.querySelector("a[href]");
+  const link = block.querySelector('a[href$=".json"]');
 
   if (!link) {
     block.textContent = "Country API URL not found.";
