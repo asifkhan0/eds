@@ -1,65 +1,77 @@
 
 export default async function decorate(block) {
   const countries = block.querySelector('a[href$=".json"]');
-  console.log("Countries block found:", countries);
 
-  if (!countries) return;
+  if (!countries) {
+    console.error("Countries JSON link not found");
+    return;
+  }
+
+  const url = countries.href;
+  console.log("API URL:", url);
 
   const parentDiv = countries.closest("div");
-  parentDiv.classList.add("countries-block");
 
   try {
-    const table = await createTable(countries.href, null);
-
-    parentDiv.append(table);
-    countries.replaceWith(parentDiv);
+    const table = await createTable(url);
+    parentDiv.classList.add("countries-block");
+    parentDiv.replaceChildren(table);
   } catch (error) {
-    console.error("Error creating countries table:", error);
-    parentDiv.textContent = "Unable to load countries.";
+    console.error("Countries API error:", error);
+    parentDiv.textContent = `Unable to load countries: ${error.message}`;
   }
 }
 
-async function createTable(url, columns = null) {
+async function createTable(url) {
   const response = await fetch(url);
 
+  console.log("Response status:", response.status);
+
   if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
+    throw new Error(`HTTP ${response.status}`);
   }
 
   const result = await response.json();
-  const data = Array.isArray(result) ? result : result.data;
 
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("No country data found.");
+  console.log("API response:", result);
+
+  // Handle common JSON response structures
+  const data = Array.isArray(result)
+    ? result
+    : Array.isArray(result.data)
+      ? result.data
+      : Array.isArray(result.results)
+        ? result.results
+        : null;
+
+  if (!data || data.length === 0) {
+    throw new Error("Could not find an array of country records");
   }
 
-  // Use provided columns or derive them from the first object
-  const headers = columns ?? Object.keys(data[0]);
+  console.log("Country records:", data.length);
+  console.log("First country:", data[0]);
+
+  const headers = Object.keys(data[0]);
 
   const table = document.createElement("table");
-  table.classList.add("countries-table");
-
   const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+
   const headerRow = document.createElement("tr");
 
-  headers.forEach((column) => {
+  headers.forEach((key) => {
     const th = document.createElement("th");
-    th.textContent =
-      typeof column === "string" ? column : column.label;
+    th.textContent = key;
     headerRow.append(th);
   });
 
   thead.append(headerRow);
 
-  const tbody = document.createElement("tbody");
-
   data.forEach((item) => {
     const row = document.createElement("tr");
 
-    headers.forEach((column) => {
-      const key = typeof column === "string" ? column : column.key;
+    headers.forEach((key) => {
       const td = document.createElement("td");
-
       td.textContent = item[key] ?? "";
       row.append(td);
     });
